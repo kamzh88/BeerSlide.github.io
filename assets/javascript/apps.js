@@ -17,18 +17,49 @@ function renderButtons() {
 function displayImage(image) {
     var image = $(this).attr("data-name");
     var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + image + "&api_key=bC6kpJP97Ro3WfVUucytyb3MKmLkZcF9&limit=10";
-    $.ajax({ url: queryURL, method: "GET" })
-        .done(function (response) {
-            for (var i = 0; i < response.data.length; i++) {
-                var animalDiv = $('<div>');
-                var p = $('<p>').text("Rating: " + response.data[i].rating);
-                var animalImage = $('<img class="gif">');
-                animalImage.attr('src', response.data[i].images.fixed_height_still.url);
-                animalDiv.prepend(p);
-                animalDiv.prepend(animalImage);
-                $('#image-div').prepend(animalDiv);
+    $.ajax({
+        url: queryURL, method: "GET"
+    }).then(function (response) {
+
+        for (var i = 0; i < response.data.length; i++) {
+            var animalDiv = $('<div>');
+
+            //still URL gif img
+            var imgURL = response.data[i].images.fixed_height_still.url
+
+            //animate URL gif img
+            var animateURL = response.data[i].images.fixed_height.url
+
+            //Include a rating in a paragraph tag
+            var rating = $('<p>').text("Rating: " + response.data[i].rating);
+
+            var animalImage = $('<img>').attr({
+                'data-state': 'still',
+                'src': imgURL,
+                'data-still': imgURL,
+                'data-animate': animateURL,
+                'class': 'gif'
+            });
+            
+            animalDiv.prepend(rating);
+            animalDiv.prepend(animalImage);
+            $('#image-div').prepend(animalDiv);
+        }
+        //make gif animate
+        $('.gif').on('click', function () {
+            var state = $(this).attr('data-state');
+
+            if (state === 'still') {
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state", "animate");
+
+            } else {
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state", "still");
             }
-        })
+            
+        });
+    })
 }
 
 //when you select Go, you will creat a new button put images on the page.
@@ -40,16 +71,12 @@ $("#select-search").on("click", function (event) {
 });
 
 //select each button to show images
-$('#search-button').on("click", function(){
+$('#search-button').on("click", function () {
     event.preventDefault();
     displayImage(animals);
 });
 
-//make gif animate
-// $('.gif').on('click', function() {
-    
 
-// })
 
 $(document).on("click", ".animal-btn", displayImage);
 
